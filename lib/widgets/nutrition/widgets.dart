@@ -1,0 +1,10 @@
+export 'calorie_card_widget.dart';
+export 'food_item_1_widget.dart';
+export 'food_item_2_widget.dart';
+export 'food_list_widget.dart';
+export 'macronutrient_bar_widget.dart';
+export 'meal_card_widget.dart';
+export 'remaining_calories_number_widget.dart';
+export 'remaining_calories_scale_widget.dart';
+export 'star_icon_widget.dart';
+export 'qr_scanner_widget.dart';
