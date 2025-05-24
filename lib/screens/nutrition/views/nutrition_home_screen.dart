@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrition_app/screens/screens.dart';
 import 'package:nutrition_app/widgets/nutrition/widgets.dart';
@@ -11,68 +10,81 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: false,
-            pinned: false,
-            //toolbarHeight: 40,
-            backgroundColor: Colors.white,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.grey),
-              onPressed: () {},
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'Edit',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0, left: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "MyFitPal",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(32),
+                      onTap: () {},
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.settings),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              const CalorieCard(),
+              Expanded(
+                child: BlocBuilder<MealBloc, MealState>(
+                  builder: (context, state) {
+                    if (state is MealInitial) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.orange,
+                        ),
+                      );
+                    }
+                    if (state is MealLoaded) {
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: state.meals.length,
+                        itemBuilder: (context, index) {
+                          final meal = state.meals[index];
+                          return MealCard(
+                            title: meal.name,
+                            calories: meal.calories,
+                            items: meal.items,
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(
+                            height: 8,
+                          );
+                        },
+                      );
+                    } else {
+                      return const Center(child: Text('Something went wrong!'));
+                    }
+                  },
                 ),
               ),
             ],
           ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                const CalorieCard(),
-                BlocBuilder<MealBloc, MealState>(
-                  builder: (context, state) {
-                    if (state is MealInitial) {
-                      return const CircularProgressIndicator(
-                        color: Colors.orange,
-                      );
-                    }
-                    if (state is MealLoaded) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (int index = 0; index < state.meals.length; index++)
-                            MealCard(
-                              title: state.meals[index].name,
-                              calories: state.meals[index].calories,
-                              items: state.meals[index].items,
-                            ),
-                        ],
-                      );
-                    } else {
-                      return const Text('Something went wrong!');
-                    }
-                  },
-                ),
-                buildNotes(),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
       bottomNavigationBar: bottomNavigationBar(),
     );
   }
 
-Container bottomNavigationBar() {
+  Container bottomNavigationBar() {
     return Container(
       height: 65,
       decoration: const BoxDecoration(
@@ -82,7 +94,7 @@ Container bottomNavigationBar() {
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            offset: Offset(0, -1), // Offset in the upward direction
+            offset: Offset(0, -1),
             blurRadius: 8.0,
           ),
         ],
@@ -123,44 +135,11 @@ Container bottomNavigationBar() {
                     color: Colors.grey,
                   ),
                   onPressed: () {
-                    // Add your forward button action here
                   },
                 ),
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Padding buildNotes() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: SizedBox(
-        height: 60,
-        child: Card(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          elevation: 4,
-          child: ListTile(
-              title: const Text(
-                'Notes',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              trailing: GestureDetector(
-                onTap: () {},
-                child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                    )),
-              )),
         ),
       ),
     );

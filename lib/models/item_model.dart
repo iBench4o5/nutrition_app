@@ -49,7 +49,7 @@ class Item extends Equatable {
       id: '0',
       name: 'Lino Pillows',
       imageURL:
-          'https://d17zv3ray5yxvp.cloudfront.net/variants/nzFqecVM1AasvKZNg8bC5JH6/57ed05bea98bceae5f0eaada26b69cee6c61471d3030f7123d212844a35eba04',
+          'https://d17zv3ray5yxvp.cloudfront.net/variants/WBVDzFGVQBrbbPuMwxYvtvdK/357327d81e7592a6661fbca6215a61db162ccd438802a608d05fb668bf373162',
       calories: 312,
       carbs: 24.5,
       fat: 3,

@@ -39,15 +39,16 @@ class FoodItem1 extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => FoodDetail(title: title, item: item,)),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8.0),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FoodDetail(title: title, item: item,)),
+            );
+          },
           child: Row(
             children: [
               Container(

@@ -14,7 +14,7 @@ class RemainingCaloriesScale extends StatelessWidget {
         if (state is MealLoaded) {
           final totalCalories = _calculateTotalCalories(state.meals);
           final remainingCalories = (1900 - totalCalories).clamp(0, double.infinity).toInt();
-          double width = 330;
+          double width = 360;
 
           return Container(
             width: width,
@@ -58,7 +58,7 @@ class RemainingCaloriesScale extends StatelessWidget {
             ),
           );
         } else {
-          return const Text('Gayyyyyyyyyyyy');
+          return const Text('Error 1');
         }
       }
     );
