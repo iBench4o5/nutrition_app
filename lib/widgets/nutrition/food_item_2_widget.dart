@@ -35,8 +35,9 @@ class FoodItem2 extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(item.imageURL,
-                    width: 60, height: 60, fit: BoxFit.cover),
+                child: item.imageURL.isNotEmpty
+                    ? Image.network(item.imageURL, width: 60, height: 60, fit: BoxFit.cover)
+                    : Container(width: 60, height: 60, color: Colors.grey)
               ),
             ),
             const SizedBox(width: 10),
