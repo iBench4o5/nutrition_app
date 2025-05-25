@@ -17,7 +17,7 @@ class FoodItem2 extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => FoodDetail(title: title, item: item)));
+                builder: (context) => FoodDetail(title: title, item: item, fromFoodItem2: true,)));
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
@@ -59,7 +59,7 @@ class FoodItem2 extends StatelessWidget {
                     ],
                   ),
                   Text(
-                      'Calories: ${item.calories.toStringAsFixed(item.calories.truncateToDouble() == item.calories ? 0 : 1)}, Carbs: ${item.carbs.toStringAsFixed(item.carbs.truncateToDouble() == item.carbs ? 0 : 1)}g'),
+                      'Calories: ${item.caloriesPer100g.toStringAsFixed(item.caloriesPer100g.truncateToDouble() == item.caloriesPer100g ? 0 : 1)}, Carbs: ${item.carbs.toStringAsFixed(item.carbs.truncateToDouble() == item.carbs ? 0 : 1)}g'),
                   Text(
                       'Fat: ${item.fat.toStringAsFixed(item.fat.truncateToDouble() == item.fat ? 0 : 1)}g, Protein: ${item.protein.toStringAsFixed(item.protein.truncateToDouble() == item.protein ? 0 : 1)}g'),
                 ],

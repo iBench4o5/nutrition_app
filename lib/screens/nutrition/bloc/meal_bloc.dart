@@ -15,7 +15,7 @@ class MealBloc extends Bloc<MealEvent, MealState> {
       if (state is MealLoaded) {
         final currentState = state as MealLoaded;
         final updatedMeals = currentState.meals.map((meal) {
-          if (meal.id == event.meal.id) {
+          if (event.meal.id == meal.id) {
             int calories = meal.calories + event.item.calories;
             return Meal(
               id: meal.id,
@@ -46,5 +46,32 @@ class MealBloc extends Bloc<MealEvent, MealState> {
         emit(MealLoaded(meals: updatedMeals));
       }
     });
+
+
+    on<UpdateItemEvent>((event, emit) {
+      if (state is MealLoaded) {
+        final currentState = state as MealLoaded;
+        final updatedMeals = currentState.meals.map((meal) {
+          if (meal.id == event.meal.id) {
+            final newItems = List<Item>.from(meal.items);
+            newItems[event.index] = event.updatedItem;
+
+            final newCalories = newItems.fold<int>(
+                0, (sum, item) => sum + item.calories);
+
+            return Meal(
+              id: meal.id,
+              name: meal.name,
+              calories: newCalories,
+              items: newItems,
+            );
+          }
+          return meal;
+        }).toList();
+
+        emit(MealLoaded(meals: updatedMeals));
+      }
+    });
+
   }
 }

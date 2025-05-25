@@ -6,15 +6,121 @@ import 'package:nutrition_app/widgets/nutrition/widgets.dart';
 
 String? globalSelectedOption;
 
-class FoodDetail extends StatelessWidget {
+class FoodDetail extends StatefulWidget {
   final String title;
   final Item item;
+  final bool fromFoodItem2;
 
-  const FoodDetail({super.key, required this.title, required this.item});
+  const FoodDetail({
+    super.key,
+    required this.title,
+    required this.item,
+    this.fromFoodItem2 = false,
+  });
+
+  @override
+  State<FoodDetail> createState() => _FoodDetailState();
+}
+
+class _FoodDetailState extends State<FoodDetail> {
+  late TextEditingController _weightController;
+  int _weightGrams = 100; // default to 100g
+  late int _calculatedCalories;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _weightGrams = _parseWeight(widget.item.weight);
+    _weightController = TextEditingController(text: _weightGrams.toString());
+    _calculatedCalories = widget.item.caloriesForWeight(_weightGrams);
+  }
+
+  int _parseWeight(String weightStr) {
+    try {
+      final cleaned =
+          weightStr.toLowerCase().replaceAll(RegExp(r'[^0-9.]'), '');
+      final value = double.parse(cleaned);
+      if (weightStr.contains('kg')) {
+        return (value * 1000).round();
+      }
+      return value.round();
+    } catch (_) {
+      return 100; // fallback default
+    }
+  }
+
+  void _onWeightChanged(String val) {
+    final parsed = int.tryParse(val);
+    if (parsed != null && parsed > 0) {
+      int clamped = parsed.clamp(1, 1000);
+      if (clamped != _weightGrams) {
+        _weightController.text = clamped.toString();
+        _weightController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _weightController.text.length),
+        );
+      }
+      setState(() {
+        _weightGrams = clamped;
+        _calculatedCalories = widget.item.caloriesForWeight(_weightGrams);
+      });
+    }
+  }
+
+  void _applyChanges() {
+    final mealBloc = context.read<MealBloc>();
+    final state = mealBloc.state;
+
+    if (state is MealLoaded) {
+      final meal = state.meals.firstWhere((meal) => meal.name == widget.title);
+
+      final currentIndex = meal.items.indexWhere((i) => i.id == widget.item.id);
+      if (currentIndex == -1) return;
+
+      final updatedItem = Item(
+        id: widget.item.id,
+        name: widget.item.name,
+        caloriesPer100g:  widget.item.caloriesPer100g,
+        calories: _calculatedCalories,
+        weight: '${_weightGrams}g',
+        imageURL: widget.item.imageURL,
+        protein: widget.item.protein,
+        fat: widget.item.fat,
+        carbs: widget.item.carbs,
+      );
+
+      mealBloc.add(
+          UpdateItemEvent(meal, index: currentIndex, updatedItem: updatedItem));
+
+      mealBloc.add(RemoveItemEvent(meal, index: currentIndex));
+      if (state is MealLoaded) {
+        final meal = state.meals.firstWhere(
+                (meal) => meal.name == globalSelectedOption);
+        mealBloc.add(AddItemEvent(meal, item: updatedItem));
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Item updated in ${widget.title} with $_weightGrams g'),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+    }
+
+    Navigator.pop(context);
+
+  }
+
+  @override
+  void dispose() {
+    _weightController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    globalSelectedOption = title;
+    globalSelectedOption = widget.title;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -29,67 +135,107 @@ class FoodDetail extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            buildImage(),
-            const SizedBox(height: 16),
-            buildGeneralInfo(),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                buildCaloriesBar(item.calories),
-                buildCarbs(item.carbs),
-                buildFat(item.fat),
-                buildProtein(item.protein),
-              ],
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                final mealBloc = context.read<MealBloc>();
-                final state = mealBloc.state;
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              buildImage(),
+              const SizedBox(height: 16),
+              buildGeneralInfo(),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  buildCaloriesBar(widget.item.caloriesPer100g),
+                  buildCarbs(widget.item.carbs),
+                  buildFat(widget.item.fat),
+                  buildProtein(widget.item.protein),
+                ],
+              ),
+              const SizedBox(height: 32),
+              widget.fromFoodItem2
+                  ? ElevatedButton(
+                      onPressed: () {
+                        final mealBloc = context.read<MealBloc>();
+                        final state = mealBloc.state;
 
-                if (state is MealLoaded) {
-                  final meal = state.meals
-                      .firstWhere((meal) => meal.name == globalSelectedOption);
-                  mealBloc.add(AddItemEvent(meal, item: item));
-                }
+                        final updatedItem = Item(
+                          id: widget.item.id,
+                          name: widget.item.name,
+                          caloriesPer100g:  widget.item.caloriesPer100g,
+                          calories: _calculatedCalories,
+                          weight: '${_weightGrams}g',
+                          imageURL: widget.item.imageURL,
+                          protein: widget.item.protein,
+                          fat: widget.item.fat,
+                          carbs: widget.item.carbs,
+                        );
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Item added to $globalSelectedOption',
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
+
+                        if (state is MealLoaded) {
+                          final meal = state.meals.firstWhere(
+                              (meal) => meal.name == globalSelectedOption);
+                          mealBloc.add(AddItemEvent(meal, item: updatedItem));
+                        }
+          
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Item added to $globalSelectedOption',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                            duration: const Duration(seconds: 1),
+                            backgroundColor: Colors.orangeAccent,
+                          ),
+                        );
+
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        side:
+                            const BorderSide(color: Color(0xFFA32D2D), width: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 8),
                       ),
-                    ),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: Colors.orangeAccent,
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                side: const BorderSide(color: Color(0xFFA32D2D), width: 2),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
-              ),
-              child: const Text(
-                '+ Add food',
-                style: TextStyle(
-                  color: Color(0xFFA32D2D),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
+                      child: const Text(
+                        '+ Add food',
+                        style: TextStyle(
+                          color: Color(0xFFA32D2D),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: _applyChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        side:
+                            const BorderSide(color: Color(0xFFA32D2D), width: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 8),
+                      ),
+                      child: const Text(
+                        'Apply changes',
+                        style: TextStyle(
+                          color: Color(0xFFA32D2D),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+            ],
+          ),
         ),
       ),
     );
@@ -245,7 +391,7 @@ class FoodDetail extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16.0),
             child: Image.network(
-              item.imageURL,
+              widget.item.imageURL,
               fit: BoxFit.cover,
             ),
           ),
@@ -258,7 +404,7 @@ class FoodDetail extends StatelessWidget {
               width: 20,
             ),
             Text(
-              item.name,
+              widget.item.name,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -284,105 +430,23 @@ class FoodDetail extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Serving size', style: TextStyle(fontSize: 16)),
-            Container(
+            const Text('Weight (g)', style: TextStyle(fontSize: 16)),
+            SizedBox(
               width: 100,
               height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
               child: TextField(
-                readOnly: true,
-                textAlign: TextAlign.center,
+                controller: _weightController,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
                   ),
-                  hintText: '1 piece',
-                  contentPadding: const EdgeInsets.all(10.0),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
+                onChanged: _onWeightChanged,
               ),
-            )
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Number of servings', style: TextStyle(fontSize: 16)),
-            Container(
-              width: 100,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(
-                readOnly: true,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: '1',
-                  contentPadding: const EdgeInsets.all(10.0),
-                ),
-              ),
-            )
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Time', style: TextStyle(fontSize: 16)),
-            Container(
-              width: 100,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(
-                readOnly: true,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: '12:00',
-                  contentPadding: const EdgeInsets.all(10.0),
-                ),
-              ),
-            )
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -406,7 +470,7 @@ class FoodDetail extends StatelessWidget {
                   ],
                 ),
                 child: MyDropdown(
-                  initialValue: title,
+                  initialValue: widget.title,
                 ))
           ],
         ),
@@ -420,7 +484,7 @@ class FoodDetail extends StatelessWidget {
       children: [
         const Text('Calories', style: TextStyle(fontSize: 12)),
         Text(
-          '${calories}cal',
+          '${_calculatedCalories} cal',
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,

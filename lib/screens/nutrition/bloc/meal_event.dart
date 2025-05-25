@@ -29,3 +29,15 @@ class RemoveItemEvent extends MealEvent {
   @override
   List<Object> get props => [meal, index];
 }
+
+class UpdateItemEvent extends MealEvent {
+  final Meal meal;
+  final int index;
+  final Item updatedItem;
+
+  const UpdateItemEvent(this.meal, {required this.index, required this.updatedItem});
+
+  @override
+  List<Object> get props => [meal, index, updatedItem];
+}
+

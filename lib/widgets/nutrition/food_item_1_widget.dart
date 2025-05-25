@@ -7,8 +7,9 @@ class FoodItem1 extends StatelessWidget {
   final String name;
   final String imageUrl;
   final int calories;
+  final int caloriesPer100g;
   final String weight;
-  final VoidCallback onRemove; // Add a callback for removing the item
+  final VoidCallback onRemove;
   final String title;
   final Item item;
 
@@ -16,6 +17,7 @@ class FoodItem1 extends StatelessWidget {
     required this.name,
     required this.imageUrl,
     required this.calories,
+    required this.caloriesPer100g,
     required this.weight,
     required this.onRemove,
     required this.title,
@@ -86,7 +88,6 @@ class FoodItem1 extends StatelessWidget {
                       children: [
                         Text(weight),
                         const SizedBox(width: 16,),
-                        const Text('time'),
                       ],
                     ),
                   ],

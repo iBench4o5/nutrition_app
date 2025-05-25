@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 class Item extends Equatable {
   final String id;
   final String name;
+  final int caloriesPer100g;
   final int calories;
   final String weight;
   final String imageURL;
@@ -13,6 +14,7 @@ class Item extends Equatable {
   const Item({
     required this.id,
     required this.name,
+    required this.caloriesPer100g,
     required this.calories,
     required this.weight,
     required this.imageURL,
@@ -21,12 +23,17 @@ class Item extends Equatable {
     required this.carbs,
   });
 
+  int caloriesForWeight(int grams) {
+    final effectiveGrams = grams > 1000 ? 1000 : grams;
+    return ((caloriesPer100g / 100) * effectiveGrams).round();
+  }
+
   @override
   List<Object> get props => [
         id,
         name,
         weight,
-        calories,
+    caloriesPer100g,
         imageURL,
         protein,
         fat,
@@ -39,33 +46,36 @@ class Item extends Equatable {
       name: 'Cekin Rooster',
       imageURL:
           'https://images-katalozi.njuskalo.hr/data/image/500x705/51148/pile-roster-cekin-1-kg-studenac1706691391342-studenac-255735452.jpg',
-      calories: 104,
+      caloriesPer100g: 240,
+      calories: 240,
       carbs: 0,
       fat: 1.1,
       protein: 23,
-      weight: '1.3 kg',
+      weight: '100g',
     ),
     const Item(
-      id: '0',
+      id: '1',
       name: 'Lino Pillows',
       imageURL:
           'https://d17zv3ray5yxvp.cloudfront.net/variants/WBVDzFGVQBrbbPuMwxYvtvdK/357327d81e7592a6661fbca6215a61db162ccd438802a608d05fb668bf373162',
-      calories: 312,
+      caloriesPer100g: 460,
+      calories: 460,
       carbs: 24.5,
       fat: 3,
       protein: 7.1,
-      weight: '500g',
+      weight: '100g',
     ),
     const Item(
-      id: '0',
+      id: '2',
       name: 'Proteinski napitak',
       imageURL:
           'https://d17zv3ray5yxvp.cloudfront.net/variants/bHzNxg2abubYiw1UezVUu4i1/f01be07266bbc10fa5c98438ae144b6610cfa79ad344cd3480e7432245669b41',
-      calories: 150,
+      caloriesPer100g: 50,
+      calories: 50,
       carbs: 12.1,
       fat: 5.7,
       protein: 99.9,
-      weight: '500ml',
+      weight: '100g',
     ),
   ];
 }

@@ -14,16 +14,16 @@ class RemainingCalories extends StatelessWidget {
         if (state is MealLoaded) {
           const dailyIntake = 1900;
           final totalCalories = _calculateTotalCalories(state.meals);
-          final remainingCalories = (dailyIntake - totalCalories).clamp(0, double.infinity).toInt();
+          final remainingCalories = (dailyIntake - totalCalories).toInt();
           return RichText(
             text: TextSpan(
               children: [
                 TextSpan(
                   text: '${remainingCalories.toString()} cal ',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
-                      color: Colors.black
+                      color: remainingCalories < 0 ? Colors.red : Colors.black,
                   ),
                 ),
                 const TextSpan(

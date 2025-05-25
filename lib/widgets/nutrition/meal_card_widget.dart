@@ -67,6 +67,7 @@ class MealCard extends StatelessWidget {
                 name: items[index].name,
                 imageUrl: items[index].imageURL,
                 calories: items[index].calories,
+                caloriesPer100g: items[index].caloriesPer100g,
                 weight: items[index].weight,
                 title: title,
                 item: items[index],
@@ -120,8 +121,7 @@ class MealCard extends StatelessWidget {
                 ),
               ),
             ),
-          )
-,
+          ),
         ],
       ),
     );
