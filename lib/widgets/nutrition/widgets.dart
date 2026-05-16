@@ -6,5 +6,5 @@ export 'macronutrient_bar_widget.dart';
 export 'meal_card_widget.dart';
 export 'remaining_calories_number_widget.dart';
 export 'remaining_calories_scale_widget.dart';
-export 'star_icon_widget.dart';
 export 'qr_scanner_widget.dart';
+export 'my_foods_list_widget.dart';

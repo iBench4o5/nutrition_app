@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrition_app/models/models.dart';
 import 'package:nutrition_app/screens/screens.dart';
 
+import '../../data/repositories/item_repository.dart';
+
 
 
 class FoodItem2 extends StatelessWidget {
@@ -37,8 +39,15 @@ class FoodItem2 extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(item.imageURL, width: 60, height: 60, fit: BoxFit.cover),
-              ),
+                child: item.imageURL.isEmpty
+                    ? const _NoImage()
+                    : Image.network(
+                  item.imageURL,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const _NoImage(),
+                ),              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -47,15 +56,18 @@ class FoodItem2 extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                       const SizedBox(width: 5),
-                      const Icon(Icons.star, color: Color(0xFFA32D2D), size: 16),
                     ],
                   ),
                   Text(
@@ -67,33 +79,58 @@ class FoodItem2 extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.add_circle_outline, color: Color(0xFFA32D2D)),
-              onPressed: () {
-                final mealBloc = context.read<MealBloc>();
-                final state = mealBloc.state;
+                onPressed: () async {
+                  final mealBloc = context.read<MealBloc>();
+                  final state = mealBloc.state;
 
-                if (state is MealLoaded) {
-                  final meal = state.meals.firstWhere((meal) => meal.name == title);
-                  mealBloc.add(AddItemEvent(meal, item: item));
+                  if (state is MealLoaded) {
+                    final meal = state.meals.firstWhere((meal) => meal.name == title);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          'Item added to $title',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
+                    final normalizedItem = item.copyWith(weight: '100g');
+                    mealBloc.add(AddItemEvent(meal, item: normalizedItem));
+
+                    await ItemRepository().addToUserFoods(item);
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Item added to $title',
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
                           ),
-                      ),
-                      duration: const Duration(seconds: 1),
-                      backgroundColor: Colors.orangeAccent,
-                    ),
-                  );
-                }
-              },
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: Colors.orangeAccent,
+                        ),
+                      );
+                    }
+                  }
+                },
             ),
 
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _NoImage extends StatelessWidget {
+  const _NoImage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFFF2F2F2),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.fastfood, color: Colors.grey, size: 24),
+          Text(
+            'No image',
+            style: TextStyle(fontSize: 9, color: Colors.grey),
+          ),
+        ],
       ),
     );
   }

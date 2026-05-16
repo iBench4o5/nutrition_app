@@ -68,6 +68,7 @@ class MealCard extends StatelessWidget {
                     weight: items[index].weight,
                     title: title,
                     item: items[index],
+                    itemIndex: index,
                     onRemove: () {
                       final mealBloc = context.read<MealBloc>();
                       final state = mealBloc.state;

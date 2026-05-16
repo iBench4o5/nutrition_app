@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
 
 class Item extends Equatable {
   final String id;
@@ -22,50 +23,55 @@ class Item extends Equatable {
   });
 
   @override
-  List<Object> get props => [
-        id,
-        name,
-        weight,
-        calories,
-        imageURL,
-        protein,
-        fat,
-        carbs,
-      ];
+  List<Object> get props => [id, name, weight, calories, imageURL, protein, fat, carbs];
 
-  static List<Item> items = [
-    const Item(
-      id: '0',
-      name: 'Cekin Rooster',
-      imageURL:
-          'https://images-katalozi.njuskalo.hr/data/image/500x705/51148/pile-roster-cekin-1-kg-studenac1706691391342-studenac-255735452.jpg',
-      calories: 104,
-      carbs: 0,
-      fat: 1.1,
-      protein: 23,
-      weight: '1.3 kg',
-    ),
-    const Item(
-      id: '0',
-      name: 'Lino Pillows',
-      imageURL:
-          'https://d17zv3ray5yxvp.cloudfront.net/variants/nzFqecVM1AasvKZNg8bC5JH6/57ed05bea98bceae5f0eaada26b69cee6c61471d3030f7123d212844a35eba04',
-      calories: 312,
-      carbs: 24.5,
-      fat: 3,
-      protein: 7.1,
-      weight: '500g',
-    ),
-    const Item(
-      id: '0',
-      name: 'Proteinski napitak',
-      imageURL:
-          'https://d17zv3ray5yxvp.cloudfront.net/variants/bHzNxg2abubYiw1UezVUu4i1/f01be07266bbc10fa5c98438ae144b6610cfa79ad344cd3480e7432245669b41',
-      calories: 150,
-      carbs: 12.1,
-      fat: 5.7,
-      protein: 99.9,
-      weight: '500ml',
-    ),
-  ];
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'calories': calories,
+      'weight': weight,
+      'imageURL': imageURL,
+      'carbs': carbs,
+      'fat': fat,
+      'protein': protein,
+    };
+  }
+
+  factory Item.fromMap(Map<String, dynamic> map) {
+    return Item(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      calories: (map['calories'] as num).toInt(),
+      weight: map['weight'] as String,
+      imageURL: map['imageURL'] as String,
+      carbs: (map['carbs'] as num).toDouble(),
+      fat: (map['fat'] as num).toDouble(),
+      protein: (map['protein'] as num).toDouble(),
+    );
+  }
+
+  Item copyWith({
+    String? id,
+    String? name,
+    int? calories,
+    String? weight,
+    String? imageURL,
+    double? carbs,
+    double? fat,
+    double? protein,
+  }) {
+    return Item(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      calories: calories ?? this.calories,
+      weight: weight ?? this.weight,
+      imageURL: imageURL ?? this.imageURL,
+      carbs: carbs ?? this.carbs,
+      fat: fat ?? this.fat,
+      protein: protein ?? this.protein,
+    );
+  }
+
+  static String generateId() => const Uuid().v4();
 }

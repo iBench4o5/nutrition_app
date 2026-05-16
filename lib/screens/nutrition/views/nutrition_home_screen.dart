@@ -38,31 +38,32 @@ class HomePage extends StatelessWidget {
             delegate: SliverChildListDelegate(
               [
                 const CalorieCard(),
-                BlocBuilder<MealBloc, MealState>(
-                  builder: (context, state) {
-                    if (state is MealInitial) {
-                      return const CircularProgressIndicator(
-                        color: Colors.orange,
-                      );
-                    }
-                    if (state is MealLoaded) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (int index = 0; index < state.meals.length; index++)
-                            MealCard(
-                              title: state.meals[index].name,
-                              calories: state.meals[index].calories,
-                              items: state.meals[index].items,
-                            ),
-                        ],
-                      );
-                    } else {
-                      return const Text('Something went wrong!');
-                    }
-                  },
-                ),
-                buildNotes(),
+              BlocBuilder<MealBloc, MealState>(
+                builder: (context, state) {
+                  if (state is MealInitial || state is MealLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.orange),
+                    );
+                  }
+                  if (state is MealLoaded) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int index = 0; index < state.meals.length; index++)
+                          MealCard(
+                            title: state.meals[index].name,
+                            calories: state.meals[index].calories,
+                            items: state.meals[index].items,
+                          ),
+                      ],
+                    );
+                  }
+                  if (state is MealError) {
+                    return Center(child: Text('Error: ${state.message}'));
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               ],
             ),
           ),
@@ -134,36 +135,5 @@ Container bottomNavigationBar() {
     );
   }
 
-  Padding buildNotes() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: SizedBox(
-        height: 60,
-        child: Card(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          elevation: 4,
-          child: ListTile(
-              title: const Text(
-                'Notes',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              trailing: GestureDetector(
-                onTap: () {},
-                child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                    )),
-              )),
-        ),
-      ),
-    );
-  }
 
 }

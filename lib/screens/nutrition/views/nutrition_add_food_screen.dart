@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrition_app/screens/nutrition/bloc/item_bloc.dart';
 import 'package:nutrition_app/widgets/nutrition/widgets.dart';
 
 class AddFoodScreen extends StatefulWidget {
@@ -11,10 +13,18 @@ class AddFoodScreen extends StatefulWidget {
 }
 
 class _AddFoodScreenState extends State<AddFoodScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 2,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -23,9 +33,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           toolbarHeight: 60,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: Padding(
@@ -33,51 +41,21 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           child: Column(
             children: [
               searchBar(),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TabBar(
-                  isScrollable: true,
-                  labelColor: Colors.black,
-                  indicatorColor: Colors.red,
-                  tabs: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      // Adjust padding as needed
-                      child: const Tab(text: 'Recommended'),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      // Adjust padding as needed
-                      child: const Tab(text: 'All'),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      // Adjust padding as needed
-                      child: const Tab(text: 'My Foods'),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      // Adjust padding as needed
-                      child: const Tab(text: 'Favorites'),
-                    ),
-                  ],
-                ),
-              ),
+            const TabBar(
+              isScrollable: false,
+              labelColor: Colors.black,
+              indicatorColor: Color(0xFFA32D2D),
+              indicatorSize: TabBarIndicatorSize.tab,
+              tabs: [
+                Tab(text: 'All'),
+                Tab(text: 'My Foods'),
+              ],
+            ),
               Expanded(
                 child: TabBarView(
                   children: [
-                    FoodList(
-                      title: widget.title,
-                    ),
-                    FoodList(
-                      title: widget.title,
-                    ),
-                    FoodList(
-                      title: widget.title,
-                    ),
-                    FoodList(
-                      title: widget.title,
-                    ),
+                    FoodList(title: widget.title),
+                    MyFoodsList(title: widget.title),
                   ],
                 ),
               ),
@@ -98,20 +76,38 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               color: const Color(0xFFF2F2F2),
               borderRadius: BorderRadius.circular(30.0),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Padding(
+                const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: Icon(Icons.search, color: Colors.grey),
                 ),
                 Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
                       hintText: 'Search...',
                       border: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      if (value.length >= 3 || value.isEmpty) {
+                        context.read<ItemBloc>().add(
+                              value.isEmpty
+                                  ? LoadItemsEvent()
+                                  : SearchItemsEvent(value),
+                            );
+                      }
+                    },
                   ),
                 ),
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.clear, color: Colors.grey),
+                    onPressed: () {
+                      _searchController.clear();
+                      context.read<ItemBloc>().add(LoadItemsEvent());
+                    },
+                  ),
               ],
             ),
           ),
