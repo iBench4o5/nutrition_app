@@ -6,9 +6,7 @@
 - Firebase projekt (nutrition-app)
 
 ### Postavljanje
-1. Kloniraj repozitorij:
-   git clone https://github.com/[tvoj-username]/nutrition_app.git
-   cd nutrition_app
+1. Kloniraj repozitorij
 
 2. Instaliraj dependencies:
    flutter pub get
