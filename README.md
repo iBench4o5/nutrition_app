@@ -1,18 +1,29 @@
-# nutrition_app
+## Upute za instalaciju i pokretanje
 
-## Overview
-Flutter-based mobile application designed to help users manage their nutrition and meals efficiently.
+### Preduvjeti
+- Flutter SDK 3.x
+- Android Studio / Xcode
+- Firebase projekt (nutrition-app)
 
-## Features
-- **Calorie Tracking:** Track your daily calorie intake.
-- **Meal Management:** Add, remove, and view meals with detailed nutritional information.
-- **QR Code Scanner** 
+### Postavljanje
+1. Kloniraj repozitorij:
+   git clone https://github.com/[tvoj-username]/nutrition_app.git
+   cd nutrition_app
 
-### Prerequisites
-- Flutter version 3.22.2
-- Dart 3.4.3
-- Android Studio
+2. Instaliraj dependencies:
+   flutter pub get
 
-### Starting
-- flutter run --enable-software-rendering
+3. Generiraj mockove za testove:
+   dart run build_runner build --delete-conflicting-outputs
 
+4. Pokreni aplikaciju:
+   flutter run
+
+5. Pokreni testove:
+   flutter test
+
+### Firebase
+Aplikacija koristi Firebase Firestore. google-services.json i
+GoogleService-Info.plist nisu u repozitoriju iz sigurnosnih razloga.
+Za pokretanje potrebno je kreirati vlastiti Firebase projekt i
+pokrenuti: flutterfire configure
